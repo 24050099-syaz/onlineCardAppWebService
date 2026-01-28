@@ -91,13 +91,10 @@ function requireAuth(req, res, next) {
         return res.status(401).json({ error: "Invalid/Expired token" });
     }
 }
-// Protect only ONE route for this demo
-app.post("/addcard", requireAuth, async (req, res) => {
-// existing addcard logic (same as before)
-});
+
 
 // Example Route: Get all cards
-app.get('/allcards', async(req,res)  => {
+app.get('/allcards', requiredAuth,async(req,res)  => {
     try {
         let connection = await mysql.createConnection(dbConfig);
         const [rows] = await connection.execute('SELECT * FROM defaultdb.cards');
