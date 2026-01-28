@@ -106,7 +106,7 @@ app.get('/allcards',async(req,res)  => {
 });
 
 // Example Route: Create a new card
-app.post('/addcard',requiredAuth,async(req,res)  => {
+app.post('/addcard',requireAuth,async(req,res)  => {
     const { card_name, card_pic} = req.body;
     try{
         let connection = await mysql.createConnection(dbConfig);
