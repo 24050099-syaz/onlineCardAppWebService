@@ -94,7 +94,7 @@ function requireAuth(req, res, next) {
 
 
 // Example Route: Get all cards
-app.get('/allcards', requiredAuth,async(req,res)  => {
+app.get('/allcards',async(req,res)  => {
     try {
         let connection = await mysql.createConnection(dbConfig);
         const [rows] = await connection.execute('SELECT * FROM defaultdb.cards');
@@ -106,7 +106,7 @@ app.get('/allcards', requiredAuth,async(req,res)  => {
 });
 
 // Example Route: Create a new card
-app.post('/addcard',async(req,res)  => {
+app.post('/addcard',requiredAuth,async(req,res)  => {
     const { card_name, card_pic} = req.body;
     try{
         let connection = await mysql.createConnection(dbConfig);
