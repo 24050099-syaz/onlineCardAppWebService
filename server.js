@@ -4,6 +4,7 @@ const express = require('express');
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 const port = 3000;
+const DEMO_USER = { id: 1, username: "admin", password: "admin123" };
 
 //database config info
 
@@ -53,6 +54,44 @@ app.use(
         credentials: false,
     })
 );
+
+const jwt = require("jsonwebtoken");
+const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_change_me";
+
+app.post("/login", (req, res) => {
+    const { username, password } = req.body;
+        if (username !== DEMO_USER.username || password !== DEMO_USER.password) {
+        return res.status(401).json({ error: "Invalid credentials" });
+        }
+    const token = jwt.sign(
+        { userId: DEMO_USER.id, username: DEMO_USER.username },
+        JWT_SECRET,
+        { expiresIn: "1h" }
+    );
+    res.json({ token });
+});
+
+
+function requireAuth(req, res, next) {
+    const header = req.headers.authorization; // "Bearer <token>"
+    if (!header) return res.status(401).json({ error: "Missing Authorization header" });
+
+    const [type, token] = header.split(" ");
+    if (type !== "Bearer" || !token) {
+        return res.status(401).json({ error: "Invalid Authorization format" });
+    }
+    try {
+        const payload = jwt.verify(token, JWT_SECRET);
+        req.user = payload;
+        next();
+        } catch {
+        return res.status(401).json({ error: "Invalid/Expired token" });
+    }
+}
+// Protect only ONE route for this demo
+app.post("/addcard", requireAuth, async (req, res) => {
+// existing addcard logic (same as before)
+});
 
 // Example Route: Get all cards
 app.get('/allcards', async(req,res)  => {
@@ -114,3 +153,5 @@ app.delete('/deletecard/:id', async (req, res) => {
         res.status(500).json({ message: 'Server error - could not delete card' });
     }
 });
+
+
